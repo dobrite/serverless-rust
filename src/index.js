@@ -38,8 +38,7 @@ class ServerlessPlugin {
     );
   }
 
-  _buildMuslBinary() {
-    const { service } = this.serverless.service;
+  _buildMuslBinary(f) {
     const { servicePath } = this.serverless.config;
     const { status, error } = childProcess.spawnSync(
       "docker",
@@ -48,7 +47,7 @@ class ServerlessPlugin {
         "--rm",
         "-it",
         "-v",
-        `${servicePath}/${service}:/home/rust/src`,
+        `${servicePath}/${f}:/home/rust/src`,
         "ekidd/rust-musl-builder",
         "cargo",
         "build",
@@ -66,8 +65,7 @@ class ServerlessPlugin {
     }
   }
 
-  _copyBinary(target) {
-    const { f } = this.options;
+  _copyBinary(f, target) {
     childProcess.spawnSync("mkdir", ["bin"], {
       stdio: "inherit",
       terminal: true
@@ -88,45 +86,44 @@ class ServerlessPlugin {
     }
   }
 
-  _deploy() {
-    const { service } = this.serverless;
-    let { include } = service.package;
+  _deploy(f) {
+    let { include } = this.serverless.service.package;
 
-    this._buildMuslBinary();
-    this._copyBinary(
-      `./${service.service}/target/x86_64-unknown-linux-musl/release`
-    );
+    this._buildMuslBinary(f);
+    this._copyBinary(f, `./${f}/target/x86_64-unknown-linux-musl/release`);
 
-    const path = `./bin/${service.service}`;
-
+    const path = `./bin/${f}`;
     include ? include.push(path) : (include = [path]);
   }
 
-  _clean() {
-    const { f } = this.options;
+  _clean(f) {
     fs.unlinkSync(`./bin/${f}`);
   }
 
   beforePackageDeploy() {
-    this._deploy();
+    const { functions } = this.serverless.service;
+    Object.keys(functions).forEach(this._deploy.bind(this));
   }
 
   afterPackageDeploy() {
-    this._clean();
+    const { functions } = this.serverless.service;
+    Object.keys(functions).forEach(this._clean.bind(this));
   }
 
   beforeFunctionDeploy() {
-    this._deploy();
+    const { f } = this.options;
+    this._deploy(f);
   }
 
   afterFunctionDeploy() {
-    this._clean();
+    const { f } = this.options;
+    this._clean(f);
   }
 
   beforeInvokeLocal() {
     const { f } = this.options;
     this._buildLocalBinary();
-    this._copyBinary(`./${f}/target/release`);
+    this._copyBinary(f, `./${f}/target/release`);
   }
 
   afterInvokeLocal() {
