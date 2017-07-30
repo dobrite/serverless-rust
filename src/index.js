@@ -27,9 +27,10 @@ class ServerlessPlugin {
   }
 
   _buildLocalBinary() {
+    const { service } = this.serverless.service;
     childProcess.spawnSync(
       `${process.env["HOME"]}/.cargo/bin/cargo`,
-      ["build", "--release"],
+      ["build", "--release", "--manifest-path", `./${service}/Cargo.toml`],
       {
         stdio: "inherit",
         terminal: true
@@ -38,6 +39,7 @@ class ServerlessPlugin {
   }
 
   _buildMuslBinary() {
+    const { service } = this.serverless.service;
     const { servicePath } = this.serverless.config;
     const { status, error } = childProcess.spawnSync(
       "docker",
@@ -46,7 +48,7 @@ class ServerlessPlugin {
         "--rm",
         "-it",
         "-v",
-        `${servicePath}:/home/rust/src`,
+        `${servicePath}/${service}:/home/rust/src`,
         "ekidd/rust-musl-builder",
         "cargo",
         "build",
@@ -66,9 +68,14 @@ class ServerlessPlugin {
 
   _copyBinary(target) {
     const { service } = this.serverless.service;
+    childProcess.spawnSync("mkdir", ["bin"], {
+      stdio: "inherit",
+      terminal: true
+    });
+
     const { status, error } = childProcess.spawnSync(
       "cp",
-      [`${target}/${service}`, `./${service}`],
+      [`${target}/${service}`, `./bin/${service}`],
       {
         stdio: "inherit",
         terminal: true
@@ -86,14 +93,18 @@ class ServerlessPlugin {
     let { include } = service.package;
 
     this._buildMuslBinary();
-    this._copyBinary(`./target/x86_64-unknown-linux-musl/release`);
+    this._copyBinary(
+      `./${service.service}/target/x86_64-unknown-linux-musl/release`
+    );
 
-    include ? include.push(service) : (include = [service]);
+    const path = `./bin/${service.service}`;
+
+    include ? include.push(path) : (include = [path]);
   }
 
   _clean() {
     const { service } = this.serverless.service;
-    fs.unlinkSync(service);
+    fs.unlinkSync(`./bin/${service}`);
   }
 
   beforePackageDeploy() {
@@ -113,8 +124,9 @@ class ServerlessPlugin {
   }
 
   beforeInvokeLocal() {
+    const { service } = this.serverless.service;
     this._buildLocalBinary();
-    this._copyBinary(`./target/release`);
+    this._copyBinary(`./${service}/target/release`);
   }
 
   afterInvokeLocal() {
