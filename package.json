@@ -1,0 +1,11 @@
+{
+  "name": "serverless-rust",
+  "version": "0.1.0",
+  "description": "run rust on lambda using serverless",
+  "keywords": ["serverless", "lambda", "rust"],
+  "main": "src/index.js",
+  "repository": "https://github.com/dobrite/serverless-rust",
+  "author": "Dave O <davidobrite@gmail.com>",
+  "license": "(MIT OR Apache-2.0)",
+  "dependencies": {}
+}
