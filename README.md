@@ -11,8 +11,6 @@ This is still super early and more of a POC. More features and testing are still
 * Musl will work for the resultant binary
 * Docker is installed and on `PATH` (in Node's runtime)
 * Cargo is at `~/.cargo/bin`
-* Rust project named same as function
-* Single function
 
 ### Works (at least on my machine)
 
@@ -24,7 +22,7 @@ This is still super early and more of a POC. More features and testing are still
 ### Nice-to-haves
 
 * `sls create --template` would be nice. (is this possible?)
-  * Python and Node runtime support (currently Node 6.10)
+  * Python and Node runtime support (currently only Node 6.10)
 * Publish to npm
 
 ### Installation (for now)
