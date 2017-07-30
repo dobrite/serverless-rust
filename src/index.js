@@ -27,10 +27,10 @@ class ServerlessPlugin {
   }
 
   _buildLocalBinary() {
-    const { service } = this.serverless.service;
+    const { f } = this.options;
     childProcess.spawnSync(
       `${process.env["HOME"]}/.cargo/bin/cargo`,
-      ["build", "--release", "--manifest-path", `./${service}/Cargo.toml`],
+      ["build", "--release", "--manifest-path", `./${f}/Cargo.toml`],
       {
         stdio: "inherit",
         terminal: true
@@ -67,7 +67,7 @@ class ServerlessPlugin {
   }
 
   _copyBinary(target) {
-    const { service } = this.serverless.service;
+    const { f } = this.options;
     childProcess.spawnSync("mkdir", ["bin"], {
       stdio: "inherit",
       terminal: true
@@ -75,7 +75,7 @@ class ServerlessPlugin {
 
     const { status, error } = childProcess.spawnSync(
       "cp",
-      [`${target}/${service}`, `./bin/${service}`],
+      [`${target}/${f}`, `./bin/${f}`],
       {
         stdio: "inherit",
         terminal: true
@@ -103,8 +103,8 @@ class ServerlessPlugin {
   }
 
   _clean() {
-    const { service } = this.serverless.service;
-    fs.unlinkSync(`./bin/${service}`);
+    const { f } = this.options;
+    fs.unlinkSync(`./bin/${f}`);
   }
 
   beforePackageDeploy() {
@@ -124,9 +124,9 @@ class ServerlessPlugin {
   }
 
   beforeInvokeLocal() {
-    const { service } = this.serverless.service;
+    const { f } = this.options;
     this._buildLocalBinary();
-    this._copyBinary(`./${service}/target/release`);
+    this._copyBinary(`./${f}/target/release`);
   }
 
   afterInvokeLocal() {
