@@ -25,5 +25,21 @@ This is still super early and more of a POC. More features and testing are still
 
 * `sls create --template` would be nice. (is this possible?)
   * Python and Node runtime support (currently Node 6.10)
+* Publish to npm
+
+### Installation (for now)
+
+```bash
+$ git clone https://github.com/dobrite/serverless-rust.git
+... elsewhere in your serverless project
+npm install --save /path/to/this/repo
+```
+
+then add in `serverless.yml`:
+
+```yaml
+plugins:
+  - serverless-rust
+```
 
 > Based on [Rust on Lambda](http://julienblanchard.com/2015/rust-on-aws-lambda/)
