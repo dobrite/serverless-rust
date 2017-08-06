@@ -10,7 +10,6 @@ class ServerlessPlugin {
 
     this.hooks = {
       "before:invoke:local:invoke": this.beforeInvokeLocal.bind(this),
-      "after:invoke:local:invoke": this.afterInvokeLocal.bind(this),
       "before:package:createDeploymentArtifacts": this.beforePackageDeploy.bind(
         this
       ),
@@ -128,11 +127,6 @@ class ServerlessPlugin {
   beforeInvokeLocal() {
     const { f } = this.options;
     this._buildLocalBinary();
-    this._copyBinary(f, `./${f}/target/release`);
-  }
-
-  afterInvokeLocal() {
-    this._clean();
   }
 }
 
