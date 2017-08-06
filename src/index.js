@@ -28,14 +28,19 @@ class ServerlessPlugin {
 
   _buildLocalBinary() {
     const { f } = this.options;
-    childProcess.spawnSync(
+    const { status, error } = childProcess.spawnSync(
       `${process.env["HOME"]}/.cargo/bin/cargo`,
       ["build", "--release", "--manifest-path", `./${f}/Cargo.toml`],
       {
         stdio: "inherit",
-        terminal: true
+        terminal: true,
+        env: process.env
       }
     );
+
+    if (status) {
+      process.exit(status);
+    }
   }
 
   _buildMuslBinary(f) {
