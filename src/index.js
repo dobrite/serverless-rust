@@ -91,13 +91,24 @@ class ServerlessPlugin {
   }
 
   _deploy(f) {
-    let { include } = this.serverless.service.package;
+    if (this.serverless.service.package.include) {
+      if (!this.serverless.service.package.include.indexOf("bin/**") > -1) {
+        this.serverless.service.package.include.push("bin/**");
+      }
+    } else {
+      this.serverless.service.package.include = ["bin/**"];
+    }
+
+    if (this.serverless.service.package.exclude) {
+      if (!this.serverless.service.package.exclude.indexOf(`${f}/**`) > -1) {
+        this.serverless.service.package.exclude.push(`${f}/**`);
+      }
+    } else {
+      this.serverless.service.package.exclude = [`${f}/**`];
+    }
 
     this._buildMuslBinary(f);
     this._copyBinary(f, `./${f}/target/x86_64-unknown-linux-musl/release`);
-
-    const path = `./bin/${f}`;
-    include ? include.push(path) : (include = [path]);
   }
 
   _clean(f) {
